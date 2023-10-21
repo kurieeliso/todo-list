@@ -1,25 +1,103 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { useState, useCallback } from 'react'
+import { v4 as uuid } from 'uuid'
+import './App.css'
+import { Box, AppBar, Tabs, Typography, useTheme, Tab } from '@mui/material'
+import SwipeableViews from 'react-swipeable-views';
+import PropTypes from 'prop-types'
 
-function App() {
+function TabPanel(props) {
+  const { children, value, index, ...other } = props;
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div
+      role="tabpanel"
+      hidden={value !== index}
+      id={`full-width-tabpanel-${index}`}
+      aria-labelledby={`full-width-tab-${index}`}
+      {...other}
+    >
+      {value === index && (
+        <Box sx={{ p: 3 }}>
+          <Typography>{children}</Typography>
+        </Box>
+      )}
     </div>
   );
+}
+
+TabPanel.propTypes = {
+  children: PropTypes.node,
+  index: PropTypes.number.isRequired,
+  value: PropTypes.number.isRequired,
+};
+
+function a11yProps(index) {
+  return {
+    id: `full-width-tab-${index}`,
+    'aria-controls': `full-width-tabpanel-${index}`,
+  };
+}
+
+function App() {
+  const [todos, setTodos] = useState([
+    {
+      title: 'Task 1',
+      id: uuid(),
+      checked: true
+    },
+    {
+      title: 'Task 2',
+      id: uuid(),
+      checked: false
+    },
+    {
+      title: 'Task 3',
+      id: uuid(),
+      checked: false
+    }
+  ])
+  const theme = useTheme();
+  const [value, setValue] = useState(0)
+
+  const handleChange = useCallback((event, newValue) => {
+    setValue(newValue)
+  },[])
+
+  const handleChangeIndex = useCallback((index) => {
+    setValue(index)
+  },[])
+
+  return <Box sx={{ bgcolor: 'background.paper', width: 500 }}>
+    <AppBar position="static">
+      <Tabs
+        value={value}
+        onChange={handleChange}
+        indicatorColor="secondary"
+        textColor="inherit"
+        variant="fullWidth"
+        aria-label="full width tabs example"
+      >
+        <Tab label="Item One" {...a11yProps(0)} />
+        <Tab label="Item Two" {...a11yProps(1)} />
+        <Tab label="Item Three" {...a11yProps(2)} />
+      </Tabs>
+    </AppBar>
+    <SwipeableViews
+      axis={theme.direction === 'rtl' ? 'x-reverse' : 'x'}
+      index={value}
+      onChangeIndex={handleChangeIndex}
+    >
+      <TabPanel value={value} index={0} dir={theme.direction}>
+        Item One
+      </TabPanel>
+      <TabPanel value={value} index={1} dir={theme.direction}>
+        Item Two
+      </TabPanel>
+      <TabPanel value={value} index={2} dir={theme.direction}>
+        Item Three
+      </TabPanel>
+    </SwipeableViews>
+  </Box>
 }
 
 export default App;
